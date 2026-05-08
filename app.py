@@ -7,270 +7,267 @@ import plotly.express as px
 from datetime import datetime
 
 # ==========================================
-# 1. CẤU HÌNH GIAO DIỆN CHUNG & TRẠNG THÁI
+# 1. CẤU HÌNH & CSS (CHUẨN CHUYÊN NGHIỆP - EDUTECH)
 # ==========================================
-st.set_page_config(page_title="Hệ thống EWS - Ban Giám Hiệu", page_icon="🏫", layout="wide")
+st.set_page_config(page_title="EWS - THPT Nguyễn Huệ", page_icon="🏫", layout="wide")
 
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-if 'analyzed' not in st.session_state:
-    st.session_state.analyzed = False
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
+    .stApp { background-color: #F8FAFC; }
+    
+    /* Màu sắc chữ và tiêu đề */
+    h1, h2, h3, h4 { color: #0F172A !important; font-weight: 700 !important; }
+    p, span, label { color: #334155 !important; }
+    
+    /* Form đăng nhập */
+    .login-container {
+        background-color: #FFFFFF; padding: 40px; border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); max-width: 450px;
+        margin: 80px auto; border-top: 5px solid #1E3A8A; 
+    }
+    .sys-title { color: #1E3A8A; font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 5px; }
+    .sys-subtitle { color: #64748B; font-size: 14px; text-align: center; margin-bottom: 30px; }
+    
+    /* Nút bấm (Button) */
+    div[data-testid="stButton"] button { border-radius: 6px !important; font-weight: 600 !important; transition: all 0.2s; }
+    div[data-testid="stButton"] button[kind="primary"] { background-color: #1E3A8A !important; color: #FFFFFF !important; border: none !important; }
+    div[data-testid="stButton"] button[kind="primary"]:hover { background-color: #1E40AF !important; }
+    
+    /* Metrics / Thẻ Chỉ số */
+    div[data-testid="stMetricValue"] { font-size: 32px; font-weight: 700; color: #0F172A; }
+    div[data-testid="stMetricLabel"] { font-size: 14px; font-weight: 600; color: #64748B; text-transform: uppercase; }
+    
+    /* Khung kết quả phân tích */
+    .card-box { background-color: white; padding: 25px; border-radius: 10px; border: 1px solid #E2E8F0; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+    [data-testid="stSidebar"] { background-color: #FFFFFF !important; border-right: 1px solid #E2E8F0; }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Khởi tạo bộ nhớ an toàn (Session State)
+if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+if 'analyzed' not in st.session_state: st.session_state.analyzed = False
+for key, val in {'val_hs': "Nhập thủ công", 'val_gpa': 5.0, 'val_vang': 0, 'val_kc': 5, 'val_hc': "Bình thường"}.items():
+    if key not in st.session_state: st.session_state[key] = val
 
 # ==========================================
-# 2. MÀN HÌNH ĐĂNG NHẬP (KHUNG HỒNG PHẤN - NÚT VIỀN XANH)
+# 2. MÀN HÌNH ĐĂNG NHẬP
 # ==========================================
 if not st.session_state.logged_in:
-    # CSS Đặc trị chỉ dành cho màn hình đăng nhập
-    st.markdown("""
-        <style>
-        [data-testid="column"]:nth-of-type(2) {
-            background-color: white !important; 
-            border: 2px solid #FFD1DC !important; /* Viền hồng phấn */
-            padding: 40px; 
-            border-radius: 12px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.05); 
-            margin-top: 60px;
-        }
-        [data-testid="column"]:nth-of-type(2) label p { color: #31333F !important; font-weight: 500 !important; }
-        .topic-title { color: #1A365D; font-size: 26px; font-weight: 700; text-align: center; margin-bottom: 30px; line-height: 1.4; }
-        
-        /* CSS cho nút đăng nhập viền xanh */
-        div[data-testid="stButton"] button { 
-            background-color: transparent !important; 
-            color: #327BB5 !important; 
-            border: 2px solid #327BB5 !important; 
-            font-weight: bold !important; 
-            border-radius: 8px !important;
-        }
-        div[data-testid="stButton"] button:hover { 
-            background-color: #327BB5 !important; 
-            color: white !important; 
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
     c1, c2, c3 = st.columns([1, 1.2, 1])
     with c2:
-        # BẠN SỬA TÊN ĐỀ TÀI Ở DÒNG DƯỚI ĐÂY NHÉ:
-        st.markdown('<div class="topic-title">MÔ PHỎNG: HỆ THỐNG CẢNH BÁO SỚM HỌC SINH (EWS)</div>', unsafe_allow_html=True)
+        st.markdown('''
+            <div class="login-container">
+                <div class="sys-title">HỆ THỐNG CẢNH BÁO SỚM (EWS)</div>
+                <div class="sys-subtitle">Đơn vị: THPT Nguyễn Huệ</div>
+        ''', unsafe_allow_html=True)
         
-        user = st.text_input("Tên đăng nhập")
-        pw = st.text_input("Mật khẩu", type="password")
+        user = st.text_input("Tên đăng nhập", placeholder="Nhập tài khoản quản trị")
+        pw = st.text_input("Mật khẩu", type="password", placeholder="••••••")
         
         st.markdown("<br>", unsafe_allow_html=True)
-        # Nút đăng nhập đã được đóng khung
-        if st.button("Đăng nhập", use_container_width=True):
+        if st.button("Đăng nhập hệ thống", use_container_width=True, type="primary"):
             if user == "admin" and pw == "123456":
                 st.session_state.logged_in = True
                 st.rerun()
-            else:
-                st.error("❌ Sai thông tin đăng nhập!")
+            else: st.error("Tài khoản hoặc mật khẩu không chính xác.")
+        st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # ==========================================
-# 3. KHỞI TẠO CƠ SỞ DỮ LIỆU & HÀM AI (ĐÃ TRẢ LẠI NGUYÊN VẸN)
+# 3. KẾT NỐI CƠ SỞ DỮ LIỆU & LÕI ĐỒNG BỘ
 # ==========================================
-# Trả lại nút bấm bình thường cho giao diện bên trong
-st.markdown("""
-    <style>
-    .main {background-color: #F8F9FA;}
-    div[data-testid="stButton"] button {background-color: transparent !important; color: inherit !important; border: 1px solid rgba(49, 51, 63, 0.2) !important; font-weight: normal !important;}
-    div[data-testid="stMetricValue"] { font-size: 30px; font-weight: 700; color: #1A365D;}
-    </style>
-""", unsafe_allow_html=True)
+def get_db_conn():
+    return sqlite3.connect('hethong_ews.db', check_same_thread=False)
 
-def init_db():
-    conn = sqlite3.connect('hethong_ews.db')
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS LichSuCanThiep (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ma_hoc_sinh TEXT,
-            gpa REAL,
-            ngay_vang INTEGER,
-            ngay_luu TEXT,
-            muc_do_rui_ro TEXT,
-            ghi_chu TEXT
-        )
-    ''')
+def db_query(q, params=(), fetch=False):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute(q, params)
+    if fetch: 
+        res = cursor.fetchall()
+        conn.close()
+        return res
     conn.commit()
     conn.close()
 
-init_db()
+db_query('''CREATE TABLE IF NOT EXISTS LichSu (id INTEGER PRIMARY KEY AUTOINCREMENT, ma TEXT, gpa REAL, vang INTEGER, ngay TEXT, rui_ro TEXT, ghi_chu TEXT)''')
+
+# HÀM ĐỒNG BỘ DỮ LIỆU THÔNG MINH (ĐÃ ĐƯỢC NÂNG CẤP)
+def sync_data():
+    if st.session_state.file_select != "Nhập thủ công" and 'current_df' in st.session_state:
+        df = st.session_state.current_df
+        id_col = st.session_state.id_col
+        row = df[df[id_col].astype(str) == st.session_state.file_select].iloc[0]
+        
+        st.session_state.val_hs = str(st.session_state.file_select)
+        st.session_state.val_hc = "Bình thường"
+        
+        # Quét thông minh qua tất cả các cột
+        for c in df.columns:
+            c_low = str(c).lower().strip()
+            val_str = str(row[c]).replace(',', '.').strip()
+            
+            try:
+                # 1. Tìm GPA
+                if any(x in c_low for x in ['gpa', 'diem', 'điểm', 'score', 'tb']):
+                    if val_str.upper() in ['A','B','C','D','F']:
+                        st.session_state.val_gpa = {'A':9.0, 'B':7.5, 'C':6.0, 'D':4.0, 'F':2.0}.get(val_str.upper(), 5.0)
+                    else:
+                        parsed_val = float(val_str)
+                        if parsed_val > 0: # Tránh gán bằng 0.0 nếu cột bị nhiễu
+                            st.session_state.val_gpa = min(max(parsed_val, 0.0), 10.0)
+                
+                # 2. Tìm Ngày Vắng
+                elif any(x in c_low for x in ['vang', 'vắng', 'absent', 'nghỉ']):
+                    if val_str.lower() not in ['nan', 'null', '']:
+                        st.session_state.val_vang = int(float(val_str))
+                
+                # 3. Tìm Khoảng cách
+                elif any(x in c_low for x in ['cach', 'distance', 'kc']):
+                    if val_str.lower() not in ['nan', 'null', '']:
+                        st.session_state.val_kc = int(float(val_str))
+                
+                # 4. AI nhận diện Gia đình đơn thân
+                elif any(x in c_low for x in ['cha', 'mẹ', 'father', 'mother', 'phụ huynh', 'parent']):
+                    if pd.isna(row[c]) or val_str == "" or val_str.lower() == "nan" or val_str == "0":
+                        st.session_state.val_hc = "Gia đình đơn thân"
+            except: pass
 
 def predict_dropout(data):
-    risk_score = 0.05
-    if data['SoNgayVang'] > 10: risk_score += 0.35
-    if data['SoNgayVang'] > 20: risk_score += 0.20
-    if data['DiemTrungBinh'] < 5.0: risk_score += 0.25
-    if data['DiemTrungBinh'] < 3.5: risk_score += 0.15
-    if data['KhoangCach'] > 15: risk_score += 0.08
-    if data['HoanCanh'] != "Bình thường": risk_score += 0.1
-    return min(risk_score, 0.98)
+    score = 0.05
+    if data['SoNgayVang'] > 10: score += 0.35
+    if data['SoNgayVang'] > 20: score += 0.20
+    if data['DiemTrungBinh'] < 5.0: score += 0.25
+    if data['KhoangCach'] > 15: score += 0.08
+    if data['HoanCanh'] == "Gia đình đơn thân": score += 0.12
+    elif data['HoanCanh'] != "Bình thường": score += 0.15
+    return min(score, 0.98)
 
 # ==========================================
-# 4. GIAO DIỆN CHÍNH THỨC (CÓ AI VÀ TẢI FILE)
+# 4. DASHBOARD CHÍNH
 # ==========================================
-col_l, col_t, col_btn = st.columns([1, 7, 1])
-with col_l:
-    st.image("https://cdn-icons-png.flaticon.com/512/2941/2941658.png", width=60)
-with col_t:
-    st.markdown("### HỆ THỐNG CẢNH BÁO SỚM HỌC SINH (EWS)")
-    st.markdown("**Đơn vị:** Ban Giám Hiệu | **Trạng thái:** Đã xác thực")
-with col_btn:
-    if st.button("🚪 Đăng xuất"):
-        st.session_state.logged_in = False
-        st.session_state.analyzed = False
-        st.rerun()
-st.divider()
+col_title, col_logout = st.columns([9, 1])
+with col_title: 
+    st.markdown("<div style='border-bottom: 1px solid #E2E8F0; padding-bottom: 10px; margin-bottom: 20px;'><h2 style='margin:0;'>Phân tích & Cảnh báo nguy cơ học sinh</h2></div>", unsafe_allow_html=True)
+with col_logout: 
+    if st.button("Đăng xuất", use_container_width=True): st.session_state.logged_in = False; st.rerun()
 
-# ==========================================
-# 5. SIDEBAR: TẢI FILE VÀ NHẬP LIỆU (ĐÃ TRẢ LẠI 100%)
-# ==========================================
 with st.sidebar:
-    st.header("📂 1. Nguồn Dữ Liệu")
-    uploaded_file = st.file_uploader("Tải file Dataset (CSV/Excel)", type=["csv", "xlsx"])
+    st.markdown("### 📊 Dữ liệu đầu vào")
+    up_file = st.file_uploader("Nạp dữ liệu (CSV/Excel)", type=["csv", "xlsx"])
     
-    def_hs, def_gpa, def_vang, def_khoangcach = "Nhập thủ công", 5.0, 0, 5
-    
-    if uploaded_file is not None:
-        try:
-            df = pd.read_csv(uploaded_file) if uploaded_file.name.endswith('.csv') else pd.read_excel(uploaded_file)
-            st.success(f"Đã nạp {len(df)} hồ sơ!")
-            all_cols = df.columns.tolist()
-            id_col = next((c for c in all_cols if 'id' in str(c).lower() or 'mã' in str(c).lower()), all_cols[0])
-            selected_hs = st.selectbox("📌 Chọn học sinh:", ["Nhập thủ công"] + df[id_col].astype(str).tolist())
-            
-            if selected_hs != "Nhập thủ công":
-                row = df[df[id_col].astype(str) == selected_hs].iloc[0]
-                def_hs = str(selected_hs)
-                st.write("**Dữ liệu gốc:**")
-                st.dataframe(row.to_frame().T)
-                
-                # Bộ lọc điểm số siêu chống lỗi
-                for c in all_cols:
-                    c_low = str(c).lower()
-                    val_str = str(row[c]).replace(',', '.').strip()
-                    try:
-                        if any(x in c_low for x in ['gpa', 'diem', 'điểm', 'score']): 
-                            if val_str.upper() == 'A': parsed_val = 9.0
-                            elif val_str.upper() == 'B': parsed_val = 7.5
-                            elif val_str.upper() == 'C': parsed_val = 6.0
-                            elif val_str.upper() == 'D': parsed_val = 4.0
-                            elif val_str.upper() == 'F': parsed_val = 2.0
-                            elif val_str.lower() in ['nan', 'null', '']: parsed_val = 5.0
-                            else: parsed_val = float(val_str)
-                            def_gpa = min(max(parsed_val, 0.0), 10.0)
-                        elif any(x in c_low for x in ['vang', 'vắng', 'absent']): 
-                            def_vang = int(float(val_str)) if val_str.lower() not in ['nan', 'null', ''] else 0
-                        elif any(x in c_low for x in ['cach', 'cách', 'distance']): 
-                            def_khoangcach = int(float(val_str)) if val_str.lower() not in ['nan', 'null', ''] else 5
-                    except: pass
-        except Exception as e: st.error(f"Lỗi đọc file: {e}")
+    if up_file:
+        df = pd.read_csv(up_file) if up_file.name.endswith('.csv') else pd.read_excel(up_file)
+        st.session_state.current_df = df
+        all_c = df.columns.tolist()
+        st.session_state.id_col = next((c for c in all_c if 'mã' in c.lower() or 'id' in c.lower() or 'student' in c.lower()), all_c[0])
+        
+        st.selectbox("Chọn hồ sơ học sinh:", ["Nhập thủ công"] + df[st.session_state.id_col].astype(str).tolist(), 
+                     key="file_select", on_change=sync_data)
+        st.success(f"Đã nạp thành công {len(df)} bản ghi.")
 
-    st.header("📝 2. Thông số Phân tích")
-    def_gpa = float(def_gpa) if not pd.isna(def_gpa) else 5.0
-    def_vang = int(def_vang) if not pd.isna(def_vang) else 0
-    def_khoangcach = int(def_khoangcach) if not pd.isna(def_khoangcach) else 5
-
-    hs_name = st.text_input("Họ tên / Mã HS:", value=def_hs)
-    diem_tb = st.slider("Điểm trung bình (GPA):", 0.0, 10.0, def_gpa, 0.1)
-    ngay_vang = st.number_input("Số ngày nghỉ học:", 0, 200, def_vang)
-    khoang_cach = st.number_input("Khoảng cách (km):", 0, 100, def_khoangcach)
-    hoan_canh = st.selectbox("Hoàn cảnh gia đình:", ["Bình thường", "Hộ nghèo", "Khó khăn đặc biệt"])
-    
     st.markdown("---")
-    # Nút AI đã được trả lại
-    if st.button("🚀 TIẾN HÀNH PHÂN TÍCH AI", use_container_width=True):
+    st.markdown("### ⚙️ Thông số chi tiết")
+    # Các trường này lấy value trực tiếp từ session_state thông qua key
+    st.text_input("Mã định danh:", key="val_hs")
+    st.slider("Điểm trung bình (GPA):", 0.0, 10.0, key="val_gpa", step=0.1)
+    st.number_input("Số ngày vắng mặt:", 0, 100, key="val_vang")
+    st.number_input("Khoảng cách đến trường (km):", 0, 100, key="val_kc")
+    st.selectbox("Tình trạng gia đình:", ["Bình thường", "Gia đình đơn thân", "Hộ nghèo", "Khó khăn đặc biệt"], key="val_hc")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("Tiến hành phân tích", use_container_width=True, type="primary"): 
         st.session_state.analyzed = True
 
 # ==========================================
-# 6. KHU VỰC KẾT QUẢ VÀ TABS AI
+# 5. KHU VỰC KẾT QUẢ
 # ==========================================
 if st.session_state.analyzed:
-    input_data = {'DiemTrungBinh': diem_tb, 'SoNgayVang': ngay_vang, 'KhoangCach': khoang_cach, 'HoanCanh': hoan_canh}
-    risk_prob = predict_dropout(input_data)
-    risk_pct = int(risk_prob * 100)
+    input_dict = {'DiemTrungBinh': st.session_state.val_gpa, 'SoNgayVang': st.session_state.val_vang, 
+                  'KhoangCach': st.session_state.val_kc, 'HoanCanh': st.session_state.val_hc}
+    risk = predict_dropout(input_dict)
+    pct = int(risk * 100)
     
-    if risk_prob < 0.3: status, color = "✅ AN TOÀN", "green"
-    elif risk_prob < 0.6: status, color = "⚠️ NGUY CƠ", "orange"
-    else: status, color = "🚨 BÁO ĐỘNG", "red"
+    if risk < 0.3: status, color_hex = "AN TOÀN", "#10B981" # Xanh lục
+    elif risk < 0.6: status, color_hex = "CẦN LƯU Ý", "#F59E0B" # Vàng cam
+    else: status, color_hex = "NGUY HIỂM", "#EF4444" # Đỏ
 
-    st.subheader(f"📊 Kết quả phân tích AI: {hs_name}")
+    # Card Metrics
+    st.markdown('<div class="card-box">', unsafe_allow_html=True)
+    st.markdown(f"<h4 style='color: #1E3A8A; margin-top:0;'>Báo cáo tổng quan: {st.session_state.val_hs}</h4>", unsafe_allow_html=True)
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("GPA", f"{diem_tb}/10")
-    m2.metric("Nghỉ học", f"{ngay_vang} ngày")
-    m3.metric("Trạng thái", status)
-    m4.metric("Chỉ số rủi ro", f"{risk_pct}%")
+    m1.metric("Mức độ rủi ro", f"{pct}%")
+    m2.metric("Trạng thái", status)
+    m3.metric("GPA hiện tại", f"{st.session_state.val_gpa}")
+    m4.metric("Ngày vắng", f"{st.session_state.val_vang}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    tab1, tab2, tab3, tab4 = st.tabs(["🎯 Báo cáo rủi ro", "🧠 Giải thích AI", "📝 Lập Kế hoạch Can thiệp", "📜 Nhật ký hệ thống"])
-
+    # Card Tabs
+    st.markdown('<div class="card-box">', unsafe_allow_html=True)
+    tab1, tab2, tab3 = st.tabs(["Biểu đồ Phân tích", "Kế hoạch Can thiệp", "Nhật ký Hệ thống"])
+    
     with tab1:
         c1, c2 = st.columns([1, 1])
         with c1:
-            fig_gauge = go.Figure(go.Indicator(
-                mode = "gauge+number", value = risk_pct,
-                number = {'suffix': "%", 'font': {'size': 40, 'color': color}},
-                gauge = {
-                    'axis': {'range': [0, 100]},
-                    'bar': {'color': color},
-                    'steps': [{'range': [0, 30], 'color': "#d4edda"}, {'range': [30, 60], 'color': "#fff3cd"}, {'range': [60, 100], 'color': "#f8d7da"}], 
-                    'threshold': {'line': {'color': color, 'width': 5}, 'thickness': 0.75, 'value': risk_pct}
-                }))
-            fig_gauge.update_layout(height=300, margin=dict(l=20, r=20, t=30, b=20))
-            st.plotly_chart(fig_gauge, use_container_width=True)
+            st.markdown("**Chỉ số nguy cơ bỏ học**")
+            fig = go.Figure(go.Indicator(mode="gauge+number", value=pct, number={'suffix': "%", 'font': {'color': '#0F172A'}},
+                gauge={'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "white"}, 'bar': {'color': color_hex}, 
+                       'steps': [{'range': [0, 30], 'color': "#D1FAE5"}, {'range': [30, 60], 'color': "#FEF3C7"}, {'range': [60, 100], 'color': "#FEE2E2"}]}))
+            fig.update_layout(height=280, margin=dict(l=20, r=20, t=30, b=20), paper_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig, use_container_width=True)
             
         with c2:
-            st.markdown("<br><br>", unsafe_allow_html=True)
-            if risk_pct >= 60: st.error("🚨 Cảnh báo: Học sinh cần sự can thiệp khẩn cấp từ Ban giám hiệu.")
-            elif risk_pct >= 30: st.warning("⚠️ Lưu ý: Học sinh có dấu hiệu bất thường về chuyên cần hoặc học lực.")
-            else: st.success("✅ Học sinh đang duy trì trạng thái học tập tốt.")
+            st.markdown("**Mức độ tác động của các yếu tố**")
+            hc_impact = 0.12 if st.session_state.val_hc == "Gia đình đơn thân" else (0.15 if st.session_state.val_hc != "Bình thường" else -0.05)
+            impact_data = pd.DataFrame({'Tiêu chí': ["GPA", "Gia đình", "Khoảng cách", "Vắng mặt"],
+                'Chỉ số': [-0.1 if st.session_state.val_gpa > 5 else 0.25, hc_impact, 0.08 if st.session_state.val_kc > 15 else -0.02, 0.45 if st.session_state.val_vang > 10 else -0.1]})
+            
+            fig_bar = px.bar(impact_data, x='Chỉ số', y='Tiêu chí', orientation='h', color='Chỉ số', color_continuous_scale=[[0, '#3B82F6'], [1, '#EF4444']])
+            fig_bar.update_layout(height=280, margin=dict(l=0, r=0, t=20, b=0), coloraxis_showscale=False, paper_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_bar, use_container_width=True)
 
     with tab2:
-        st.markdown("#### Các yếu tố ảnh hưởng chính (XAI)")
-        impact_data = pd.DataFrame({
-            'Yếu tố': ["Học lực (GPA)", "Hoàn cảnh GĐ", "Khoảng cách", "Vắng mặt"],
-            'Mức độ tác động': [-0.1 if diem_tb > 5 else 0.25, 0.15 if hoan_canh != "Bình thường" else -0.05, 0.08 if khoang_cach > 15 else -0.02, 0.45 if ngay_vang > 10 else -0.1]
-        })
-        fig_bar = px.bar(impact_data, x='Mức độ tác động', y='Yếu tố', orientation='h', color='Mức độ tác động', color_continuous_scale='RdBu_r')
-        fig_bar.update_layout(height=300, margin=dict(l=0, r=0, t=20, b=0), coloraxis_showscale=False)
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.markdown("**Đề xuất hành động hỗ trợ từ hệ thống:**")
+        col_c1, col_c2 = st.columns(2)
+        with col_c1: 
+            st.markdown("<span style='color:#1E3A8A; font-weight:600;'>Hỗ trợ Học tập & Tâm lý:</span>", unsafe_allow_html=True)
+            st.checkbox("Bố trí giáo viên phụ đạo học lực", value=(st.session_state.val_gpa < 5))
+            st.checkbox("Linh động hạn nộp bài tập", value=(st.session_state.val_vang > 5))
+            st.checkbox("Chuyển thông tin tới ban tư vấn tâm lý", value=(risk > 0.5))
+        with col_c2: 
+            st.markdown("<span style='color:#1E3A8A; font-weight:600;'>Hỗ trợ Gia đình & Tài chính:</span>", unsafe_allow_html=True)
+            st.checkbox("Tổ chức họp với Phụ huynh học sinh", value=(st.session_state.val_vang > 10))
+            st.checkbox("Tổ chức thăm hỏi gia đình", value=(st.session_state.val_hc == "Gia đình đơn thân"))
+            st.checkbox("Rà soát chính sách hỗ trợ học phí", value=(st.session_state.val_hc != "Bình thường"))
+        
+        ghi_chu = st.text_area("Cập nhật ý kiến xử lý của Giáo viên / Ban Giám hiệu:")
+        if st.button("💾 Lưu biên bản đánh giá", type="primary"):
+            db_query("INSERT INTO LichSu (ma, gpa, vang, ngay, rui_ro, ghi_chu) VALUES (?,?,?,?,?,?)", 
+                     (st.session_state.val_hs, st.session_state.val_gpa, st.session_state.val_vang, datetime.now().strftime("%d/%m/%Y %H:%M"), status, ghi_chu))
+            st.success("Hệ thống đã lưu trữ thành công vào Cơ sở dữ liệu!")
 
     with tab3:
-        st.markdown("#### 🛠️ Các hành động can thiệp khuyến nghị:")
-        col_c1, col_c2 = st.columns(2)
-        with col_c1:
-            st.write("**Hành động ưu tiên:**")
-            st.checkbox("Tổ chức họp phụ huynh đột xuất", value=(ngay_vang > 10))
-            st.checkbox("Xếp lớp phụ đạo/Kèm cặp 1-1", value=(diem_tb < 5.0))
-            st.checkbox("Tham vấn tâm lý học đường", value=(risk_pct > 50))
-        with col_c2:
-            st.write("**Hành động bổ trợ:**")
-            st.checkbox("Xét duyệt học bổng/Trợ cấp", value=(hoan_canh != "Bình thường"))
-            st.checkbox("Gia hạn thời gian nộp bài tập/học phí")
-            st.checkbox("Theo dõi đặc biệt từ GV Chủ nhiệm")
-
-        ghi_chu = st.text_area("Ghi chú chi tiết của Cán bộ Giáo vụ:", placeholder="Nhập thêm nội dung can thiệp tại đây...")
-        
-        if st.button("💾 XÁC NHẬN & LƯU VÀO CSDL"):
-            conn = sqlite3.connect('hethong_ews.db')
-            c = conn.cursor()
-            time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            c.execute("INSERT INTO LichSuCanThiep (ma_hoc_sinh, gpa, ngay_vang, ngay_luu, muc_do_rui_ro, ghi_chu) VALUES (?, ?, ?, ?, ?, ?)",
-                      (hs_name, diem_tb, ngay_vang, time_now, status, ghi_chu))
-            conn.commit(); conn.close()
-            st.success(f"✅ Đã lưu hồ sơ của {hs_name} vào CSDL thành công!")
-
-    with tab4:
-        st.markdown("#### 📜 Danh sách các hồ sơ đã lưu")
-        conn = sqlite3.connect('hethong_ews.db')
-        df_db = pd.read_sql_query("SELECT * FROM LichSuCanThiep ORDER BY ngay_luu DESC", conn)
-        conn.close()
-        if not df_db.empty:
-            df_db.columns = ['STT', 'Mã Học Sinh', 'GPA', 'Số Ngày Vắng', 'Ngày Lưu', 'Mức Độ Rủi Ro', 'Ghi Chú']
-            st.dataframe(df_db, use_container_width=True)
-            st.download_button("📥 Xuất báo cáo CSV", df_db.to_csv(index=False).encode('utf-8-sig'), "lich_su_can_thiep.csv", "text/csv")
-        else:
-            st.info("Cơ sở dữ liệu đang trống.")
+        st.markdown("**Cơ sở dữ liệu lưu trữ**")
+        data = db_query("SELECT * FROM LichSu ORDER BY id DESC", fetch=True)
+        if data:
+            df_log = pd.DataFrame(data, columns=['ID', 'Mã HS', 'GPA', 'Vắng', 'Ngày lưu', 'Rủi ro', 'Ghi chú'])
+            st.dataframe(df_log, use_container_width=True, hide_index=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("**Quản lý dữ liệu**")
+            col_del1, col_del2 = st.columns([2, 3])
+            with col_del1:
+                delete_list = [f"{r[0]} - Mã: {r[1]} ({r[4]})" for r in data]
+                to_delete = st.selectbox("Chọn bản ghi cần xóa:", delete_list, label_visibility="collapsed")
+            with col_del2:
+                if st.button("❌ Xóa bản ghi", type="secondary"):
+                    target_id = to_delete.split(" - ")[0]
+                    db_query("DELETE FROM LichSu WHERE id=?", (target_id,))
+                    st.rerun()
+        else: st.info("Hệ thống chưa có dữ liệu lưu trữ.")
+    st.markdown('</div>', unsafe_allow_html=True)
 else:
-    st.info("💡 Hãy nạp dữ liệu ở bên trái và nhấn 'PHÂN TÍCH AI' để bắt đầu.")
+    st.info("💡 Hệ thống đang ở trạng thái chờ. Vui lòng nhập thông tin tại menu bên trái và chọn 'Tiến hành phân tích'.")
